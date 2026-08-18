@@ -1,0 +1,371 @@
+/* ============================================================
+   恒衍产业平台 · 国君机构设计系统视觉重制
+   依据：guojun-institution-ui（MasterGo 国君机构服务平台 WEB UI设计规范）
+   原则：所有颜色映射到命名 token；页面底色 #F5F7FA；卡片白底 6px；
+         品牌蓝 #0059EC 仅用于关键操作与选中态；红绿仅表达涨跌语义
+   ============================================================ */
+
+/* ---------- Guojun tokens ---------- */
+:root {
+  --gj-color-brand-primary: #0059ec;
+  --gj-color-brand-secondary: #5795fa;
+  --gj-color-page: #f5f7fa;
+  --gj-color-surface: #fff;
+  --gj-color-category-title: #192646;
+  --gj-color-text-tab: rgba(0, 0, 0, .9);
+  --gj-color-text-heading: rgba(0, 0, 0, .88);
+  --gj-color-text-body: rgba(0, 0, 0, .6);
+  --gj-color-text-aux: rgba(0, 0, 0, .45);
+  --gj-color-icon-muted: rgba(0, 0, 0, .25);
+  --gj-color-border: rgba(0, 0, 0, .15);
+  --gj-color-divider: rgba(0, 0, 0, .06);
+  --gj-color-error: #ef3432;
+  --gj-color-success: #05b96a;
+  --gj-font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --gj-radius-card: 6px;
+  --gj-radius-control: 6px;
+  --gj-radius-button: 8px;
+  --gj-shadow-brand: 0 10px 15px rgba(0, 89, 236, .15);
+  --gj-shadow-notification: 0 1px 2px rgba(0, 0, 0, .03), 0 1px 6px -1px rgba(0, 0, 0, .02), 0 2px 4px rgba(0, 0, 0, .02);
+  --gj-gradient-brand: linear-gradient(135deg, #0059ec, #76aaff);
+}
+
+/* ---------- 原站变量重映射（后者生效，全局级联换肤） ---------- */
+:root {
+  --navy: #0059ec;              /* 原藏青 → 品牌主蓝 */
+  --blue: #0059ec;
+  --indigo: #5795fa;            /* 原靛蓝 → 品牌次蓝（hover） */
+  --teal: #0059ec;              /* 原品牌青 → 品牌主蓝 */
+  --teal-soft: rgba(0, 89, 236, .08);
+  --ink: rgba(0, 0, 0, .88);
+  --muted: rgba(0, 0, 0, .45);
+  --line: rgba(0, 0, 0, .06);   /* 细分隔线 */
+  --soft: #f5f7fa;
+  --soft-blue: rgba(0, 89, 236, .06);
+  --red: #ef3432;               /* 涨/错误语义 */
+  --green: #05b96a;             /* 跌/成功语义 */
+  --white: #fff;
+}
+
+/* ---------- 全局基底 ---------- */
+body {
+  background: var(--gj-color-page);
+  color: var(--gj-color-text-heading);
+  font-family: var(--gj-font-sans);
+}
+::selection { background: rgba(0, 89, 236, .15); }
+
+/* ---------- 顶部信息条：深色 → 浅色 ---------- */
+.utility {
+  background: var(--gj-color-surface);
+  color: var(--gj-color-text-aux);
+  border-bottom: 1px solid var(--gj-color-divider);
+}
+.utility button {
+  color: var(--gj-color-text-body);
+}
+.utility>div>span:hover,
+.utility button:hover {
+  color: var(--gj-color-brand-primary);
+}
+
+/* ---------- 主导航 ---------- */
+.main-header {
+  background: var(--gj-color-surface);
+  border-bottom: 1px solid var(--gj-color-divider);
+  box-shadow: var(--gj-shadow-notification);
+}
+.logo { color: var(--gj-color-text-heading); }
+.logo>span {
+  background: var(--gj-gradient-brand);
+  color: #fff;
+  border-radius: var(--gj-radius-card);
+}
+.logo>i {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-sm, 4px);
+}
+.main-header nav>button {
+  color: var(--gj-color-text-tab);
+  border-radius: var(--gj-radius-control);
+}
+.main-header nav>button:hover {
+  color: var(--gj-color-brand-primary);
+}
+.main-header nav>button.active {
+  color: var(--gj-color-brand-primary);
+  font-weight: 650;
+}
+.main-header nav>button.active:after {
+  background: var(--gj-color-brand-primary);
+}
+.bell { color: var(--gj-color-text-body); }
+.bell:hover { color: var(--gj-color-brand-primary); }
+.workspace-entry>span {
+  background: var(--gj-gradient-brand);
+  color: #fff;
+  border-radius: var(--gj-radius-card);
+}
+
+/* ---------- 数据说明条（警示语义保留暖色，弱化边框） ---------- */
+.data-disclaimer {
+  background: #fff8e9;
+  color: #705e3f;
+  border-bottom: 1px solid #efe3c7;
+}
+
+/* ---------- 面板/卡片：白底 + 6px + 细分隔线 ---------- */
+.panel,
+.home-welcome dl button,
+.quick-services>button,
+.compact-feed>button,
+.manager-card,
+.observation-lead,
+.event-row {
+  border-color: var(--gj-color-divider);
+}
+.panel {
+  background: var(--gj-color-surface);
+  border-radius: var(--gj-radius-card);
+  box-shadow: var(--gj-shadow-notification);
+}
+.home-welcome h1 { color: var(--gj-color-text-heading); }
+.home-welcome p, .home-welcome small { color: var(--gj-color-text-aux); }
+.home-welcome dl button {
+  background: var(--gj-color-surface);
+  border-radius: var(--gj-radius-card);
+  box-shadow: var(--gj-shadow-notification);
+}
+.home-welcome dl button:hover {
+  box-shadow: var(--gj-shadow-brand);
+}
+.block-title small,
+.column-title small,
+.tool-title small,
+.business-title small {
+  color: var(--gj-color-text-aux);
+  letter-spacing: .06em;
+}
+.block-title h2 { color: var(--gj-color-text-heading); font-weight: 650; }
+.block-title p { color: var(--gj-color-text-aux); }
+
+/* ---------- 按钮：主蓝填充 / 8px 圆角 / 品牌投影 ---------- */
+.plain-primary {
+  background: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-button);
+  color: #fff;
+}
+.plain-primary:hover {
+  background: var(--gj-color-brand-secondary);
+  border-color: var(--gj-color-brand-secondary);
+  box-shadow: var(--gj-shadow-brand);
+}
+.full-button {
+  background: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-button);
+}
+.full-button:hover {
+  background: var(--gj-color-brand-secondary);
+  border-color: var(--gj-color-brand-secondary);
+}
+.outline-button {
+  color: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-button);
+}
+.link-button { color: var(--gj-color-brand-primary); }
+.link-button:hover { color: var(--gj-color-brand-secondary); }
+
+/* ---------- 表格：辅助色表头 + 细分隔线 + 涨跌语义色 ---------- */
+.market-table th,
+.application-table th,
+.indicator-table th {
+  color: var(--gj-color-text-aux);
+  border-bottom-color: var(--gj-color-divider);
+}
+.market-table td,
+.application-table td,
+.indicator-table td {
+  border-bottom-color: var(--gj-color-divider);
+}
+.market-table tbody tr:hover { background: rgba(0, 89, 236, .03); }
+.market-table td em {
+  background: rgba(0, 89, 236, .06);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-sm, 4px);
+}
+
+/* ---------- 动态流 ---------- */
+.feed-type {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-sm, 4px);
+}
+.feed-type.warn {
+  background: #fff0df;
+  color: #9a6825;
+}
+.compact-feed>button:hover { background: rgba(0, 89, 236, .03); }
+.compact-feed>button>div>i { background: var(--gj-color-brand-primary); }
+
+/* ---------- 产业服务快捷区 ---------- */
+.quick-services>button:hover { background: rgba(0, 89, 236, .03); }
+.quick-services>button>span { color: var(--gj-color-brand-secondary); }
+.quick-services>button i { color: var(--gj-color-icon-muted); }
+.quick-services>button:hover i { color: var(--gj-color-brand-primary); }
+
+/* ---------- 工作台进度步骤 ---------- */
+.work-summary ol li.done,
+.work-summary ol li.current {
+  color: var(--gj-color-brand-primary);
+  border-top-color: var(--gj-color-brand-primary);
+}
+.progress-item em {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-sm, 4px);
+}
+.manager-card>div>span {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-card);
+}
+.manager-card button {
+  color: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-button);
+}
+.manager-card button:hover { box-shadow: var(--gj-shadow-brand); }
+
+/* ---------- 市场观察/活动 ---------- */
+.observation-lead>span {
+  color: var(--gj-color-brand-primary);
+}
+.event-row em {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-sm, 4px);
+}
+
+/* ---------- 表单控件：6px + 15% 黑边框 ---------- */
+.site-shell input,
+.site-shell select,
+.site-shell textarea,
+.hxb-form input,
+.hxb-form select,
+.hxb-form textarea,
+.hx-ai-input input {
+  border-color: var(--gj-color-border);
+  border-radius: var(--gj-radius-control);
+}
+.site-shell input:focus,
+.site-shell select:focus,
+.site-shell textarea:focus,
+.hx-ai-input input:focus {
+  border-color: var(--gj-color-brand-primary);
+  outline: none;
+}
+
+/* ---------- 页脚：深色 → 克制白底 ---------- */
+.site-footer {
+  background: var(--gj-color-surface);
+  color: var(--gj-color-text-aux);
+  border-top: 1px solid var(--gj-color-divider);
+}
+.site-footer b { color: var(--gj-color-text-heading); }
+.site-footer a:hover { color: var(--gj-color-brand-primary); }
+
+/* ---------- 面包屑/栏目标题 ---------- */
+.breadcrumb { color: var(--gj-color-text-aux); }
+.breadcrumb b { color: var(--gj-color-text-heading); }
+.column-title h1,
+.tool-title h1,
+.business-title h1 { color: var(--gj-color-text-heading); }
+
+/* ---------- Toast ---------- */
+.toast {
+  background: var(--gj-color-category-title);
+  border-radius: var(--gj-radius-button);
+}
+
+/* ============================================================
+   增强层组件跟随换肤（hx-/hxb- 前缀）
+   ============================================================ */
+.hx-ai-ball {
+  background: var(--gj-gradient-brand);
+  box-shadow: var(--gj-shadow-brand);
+}
+.hx-ai-head {
+  background: var(--gj-gradient-brand);
+}
+.hx-btn.primary {
+  background: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+  border-radius: var(--gj-radius-button);
+}
+.hx-btn.primary:hover {
+  background: var(--gj-color-brand-secondary);
+  border-color: var(--gj-color-brand-secondary);
+  box-shadow: var(--gj-shadow-brand);
+}
+.hx-btn { border-radius: var(--gj-radius-button); }
+.hx-modal { border-radius: var(--gj-radius-button); box-shadow: 0 20px 50px rgba(0, 0, 0, .18); }
+.hx-msg-panel,
+.hx-ai-drawer,
+.hx-toolbar,
+.hxb-side,
+.hxb-main {
+  border-color: var(--gj-color-divider);
+  box-shadow: var(--gj-shadow-notification);
+  border-radius: var(--gj-radius-card);
+}
+.hx-toolbar .hx-seg button.on { background: var(--gj-color-brand-primary); }
+.hx-msg-tabs button.on {
+  background: rgba(0, 89, 236, .08);
+  border-color: var(--gj-color-brand-primary);
+  color: var(--gj-color-brand-primary);
+}
+.hx-msg-item i { background: var(--gj-color-brand-primary); }
+.hx-bell-badge { background: var(--gj-color-error); }
+.hx-nav-dot::after { background: var(--gj-color-error); }
+.hxb-dot { background: var(--gj-color-error) !important; }
+.hxb-side button.on {
+  background: rgba(0, 89, 236, .08);
+  color: var(--gj-color-brand-primary);
+}
+.hxb-tabs button.on {
+  background: var(--gj-color-brand-primary);
+  border-color: var(--gj-color-brand-primary);
+}
+.hxb-item:hover h4 { color: var(--gj-color-brand-primary); }
+.hxb-item .hxb-cat {
+  background: rgba(0, 89, 236, .06);
+  color: var(--gj-color-brand-primary);
+}
+.hxb-new { background: var(--gj-color-error); }
+.hxb-event time {
+  background: rgba(0, 89, 236, .06);
+  color: var(--gj-color-brand-primary);
+}
+.hx-note {
+  background: rgba(0, 89, 236, .04);
+  border-color: rgba(0, 89, 236, .15);
+  color: var(--gj-color-brand-primary);
+}
+.hx-note.info {
+  background: rgba(0, 89, 236, .06);
+  border-color: rgba(0, 89, 236, .18);
+  color: var(--gj-color-brand-primary);
+}
+.hx-guest-ribbon {
+  background: rgba(0, 89, 236, .06);
+  border-bottom-color: rgba(0, 89, 236, .18);
+  color: var(--gj-color-brand-primary);
+}
+.hx-guest-ribbon button { color: var(--gj-color-brand-primary); }
+.hx-ai-msg.user { background: var(--gj-color-brand-primary); }
+.hx-ai-status i { background: var(--gj-color-success); }
+.hx-ai-scenes button:hover { border-color: var(--gj-color-brand-primary); }

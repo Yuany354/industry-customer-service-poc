@@ -1,0 +1,7 @@
+interface:
+  display_name: "国君机构服务平台 UI"
+  short_description: "按国君机构服务平台 MasterGo 规范设计和检查 WEB 原型"
+  brand_color: "#0059EC"
+  default_prompt: "使用 $guojun-institution-ui 设计一个符合国君机构服务平台规范的 WEB 页面。"
+policy:
+  allow_implicit_invocation: true

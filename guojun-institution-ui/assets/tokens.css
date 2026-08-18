@@ -1,0 +1,48 @@
+:root {
+  --gj-color-brand-primary: #0059ec;
+  --gj-color-brand-secondary: #5795fa;
+  --gj-color-page: #f5f7fa;
+  --gj-color-surface: #fff;
+  --gj-color-category-title: #192646;
+  --gj-color-text-tab: rgba(0, 0, 0, 0.9);
+  --gj-color-text-heading: rgba(0, 0, 0, 0.88);
+  --gj-color-text-body: rgba(0, 0, 0, 0.6);
+  --gj-color-text-aux: rgba(0, 0, 0, 0.45);
+  --gj-color-icon-muted: rgba(0, 0, 0, 0.25);
+  --gj-color-border: rgba(0, 0, 0, 0.15);
+  --gj-color-divider: rgba(0, 0, 0, 0.06);
+  --gj-color-error: #ef3432;
+  --gj-color-success: #05b96a;
+
+  --gj-font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --gj-font-size-xs: 10px;
+  --gj-font-size-sm: 12px;
+  --gj-font-size-body-compact: 14px;
+  --gj-font-size-body: 16px;
+  --gj-font-size-title: 20px;
+  --gj-font-size-section: 22px;
+  --gj-font-size-display: 32px;
+
+  --gj-space-1: 2px;
+  --gj-space-2: 4px;
+  --gj-space-3: 8px;
+  --gj-space-4: 12px;
+  --gj-space-5: 16px;
+  --gj-space-6: 20px;
+  --gj-space-7: 24px;
+  --gj-space-8: 30px;
+  --gj-space-9: 32px;
+  --gj-space-10: 40px;
+  --gj-space-11: 100px;
+
+  --gj-radius-sm: 4px;
+  --gj-radius-card: 6px;
+  --gj-radius-control: 6px;
+  --gj-radius-button: 8px;
+  --gj-radius-pill: 999px;
+  --gj-shadow-brand: 0 10px 15px rgba(0, 89, 236, 0.15);
+  --gj-shadow-notification: 0 1px 2px rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.02);
+  --gj-gradient-brand: linear-gradient(135deg, #0059ec, #76aaff);
+}
