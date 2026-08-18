@@ -737,7 +737,7 @@
   function renderHwWorkbench(app) {
     var w = $('.hw-workbench', app);
     w.innerHTML =
-      '<div class="block-title"><div><h2>我的工作台</h2><p>复用各模块状态 · 聚合呈现</p></div>' +
+      '<div class="block-title"><div><h2>我的工作台</h2></div>' +
       '<button class="link-button" data-w="all">全部记录 ›</button></div>' +
       '<button class="hw-wb-item" data-w="biz" data-need-sign="1"><b>在办业务</b><em>3 项</em><i>›</i></button>' +
       '<button class="hw-wb-item" data-w="risk" data-need-sign="1"><b>风控通知</b><em class="warn">⚠ 2</em><i>›</i></button>' +
@@ -791,7 +791,7 @@
   function renderHwResearch(app) {
     var box = $('.hw-research', app);
     box.innerHTML =
-      '<div class="block-title"><div><small>RESEARCH PICKS</small><h2>产业投研精选</h2><p>复用市场洞察只读视图</p></div>' +
+      '<div class="block-title"><div><small>RESEARCH PICKS</small><h2>产业投研精选</h2></div>' +
       '<button class="link-button" data-more="1">更多 ›</button></div>' +
       '<div class="hw-thumbs">' +
       '<div class="hw-thumb"><b>基差地图</b>' + basisSvg() + '<small>沪铜 +80 · 螺纹 +14 · 原油 +3.6</small></div>' +
@@ -809,7 +809,7 @@
   function renderHwPolicy(app) {
     var box = $('.hw-policy', app);
     box.innerHTML =
-      '<div class="block-title"><div><small>POLICY FEED</small><h2>政策与解读</h2><p>内容中心供稿</p></div>' +
+      '<div class="block-title"><div><small>POLICY FEED</small><h2>政策与解读</h2></div>' +
       '<button class="link-button" data-more="1">更多 ›</button></div>' +
       '<div class="hw-policy-list">' + HW_POLICY.map(function (a, i) {
         return '<div class="hw-policy-item" data-i="' + i + '"><span class="hw-cat">' + a.c + '</span><h4>' + a.t + '</h4><time>' + a.d + '</time></div>';
@@ -826,7 +826,7 @@
   function renderHwSourcing(app) {
     var box = $('.hw-sourcing', app);
     box.innerHTML =
-      '<div class="block-title"><div><small>SOURCING FEED</small><h2>采销信息速览</h2><p>只读卡片流 · 一期不做撮合</p></div>' +
+      '<div class="block-title"><div><small>SOURCING FEED</small><h2>采销信息速览</h2></div>' +
       '<button class="hx-btn primary" data-pub="1">发布需求</button></div>' +
       '<div class="hw-src-list">' +
       '<div class="hw-src-item"><em class="sell">出售</em><div><b>碳酸锂 99.5%</b><p>500 吨 · 华东 · 08-13 发布</p></div></div>' +
@@ -840,7 +840,7 @@
   function renderHwEvents(app) {
     var box = $('.hw-events', app);
     box.innerHTML =
-      '<div class="block-title"><div><h2>研究与活动</h2><p>君英汇沙龙 / 峰会 · 复用会议预约</p></div>' +
+      '<div class="block-title"><div><h2>研究与活动</h2></div>' +
       '<button class="link-button" data-more="1">全部 ›</button></div>' +
       '<div class="event-row"><time><b>20</b><span>8月</span></time><div><em>线下沙龙</em><h3>有色产业链沙龙</h3><p>上海 · 15:00—17:00</p></div><button class="outline-button" data-ev="0">报名</button></div>' +
       '<div class="event-row"><time><b>02</b><span>9月</span></time><div><em>线上直播</em><h3>黑色产业链秋季供需展望</h3><p>15:00—16:30 · 峰会</p></div><button class="outline-button" data-ev="1">报名</button></div>' +
