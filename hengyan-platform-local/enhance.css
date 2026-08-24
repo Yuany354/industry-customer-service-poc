@@ -976,3 +976,5 @@ section.legacy-trading{display:none !important}
   .hxd-layout{grid-template-columns:1fr;height:auto}
   .hxd-list,.hxd-mid,.hxd-doc{max-height:480px}
 }
+/* 顶部主导航不再展示产业咨询入口；页面能力保留供既有内容引用。 */
+.main-header nav>button:nth-child(2){display:none!important}

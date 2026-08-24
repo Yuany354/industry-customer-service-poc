@@ -1,5 +1,15 @@
 (function () {
   'use strict';
+  var primaryNavStyle = document.createElement('style');
+  primaryNavStyle.textContent = '.main-header nav>button:nth-child(2){display:none!important}';
+  document.head.appendChild(primaryNavStyle);
+  // 金融服务案例复用基础服务内容服务页模板。
+  (function loadFinancialCaseTemplate() {
+    var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/basic-service/content-service-templates.css?v=20260821-15'; document.head.appendChild(css);
+    var template = document.createElement('script'); template.src = '/basic-service/content-service-templates.js?v=20260821-15';
+    template.onload = function () { var cases = document.createElement('script'); cases.src = '/financial-case-content.js?v=2'; document.body.appendChild(cases); };
+    document.head.appendChild(template);
+  }());
   function mount() {
     var shell = document.querySelector('.site-shell');
     var main = document.querySelector('main');
@@ -110,5 +120,3 @@
   }, true);
   document.addEventListener('DOMContentLoaded', function () { mount(); mountMenu(); });
 })();
-
-
