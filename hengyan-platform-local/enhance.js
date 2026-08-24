@@ -459,11 +459,36 @@
   var hxb = { section: 'consult', tab: '全部', page: 1, article: null, fav: {}, talentDone: false };
 
   function buildBasicApp() {
-    var app = el('div', '', ''); app.id = 'hxb-app';
-    app.innerHTML =
-      '<div class="hxb-layout"><nav class="hxb-side"></nav><div class="hxb-main"></div></div>';
-    renderHxbSide(app);
-    renderHxbMain(app);
+    var app = el('div', 'hxb-migrated-shell', ''); app.id = 'hxb-app';
+    var frame = document.createElement('iframe');
+    frame.className = 'hxb-migrated-frame';
+    frame.style.cssText = 'display:block;width:100%;min-width:100%;min-height:720px;border:0;background:transparent;';
+    frame.title = '基础服务';
+    frame.src = migratedBasicTarget || '/basic-service/basic-service-home.html';
+    frame.addEventListener('load', function () {
+      try {
+        var doc = frame.contentDocument;
+        var style = doc.createElement('style');
+        style.textContent = 'header,.header,.utility,.top,.site-footer,footer,.data-disclaimer,.prototype-notice,.service-mega,.mega-menu{display:none!important}body{background:transparent!important;font-family:inherit!important;padding-top:0!important}main{padding-top:0!important}.crumb{margin-top:16px!important}';
+        doc.head.appendChild(style);
+        doc.addEventListener('click', function (event) {
+          var control = event.target && event.target.closest ? event.target.closest('a,button,[data-link],[data-go],[data-page-link],[data-action]') : null;
+          if (!control) return;
+          var destination = control.getAttribute('href') || control.getAttribute('data-link') || control.getAttribute('data-go') || control.getAttribute('data-page-link') || '';
+          var action = control.getAttribute('data-action') || '';
+          var label = (control.textContent || '').trim();
+          if (!/workbench/i.test(destination + ' ' + action) && label.indexOf('工作台') < 0) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          var entry = document.querySelector('.workspace-entry');
+          if (entry) entry.click();
+        }, true);
+        var syncHeight = function () { frame.style.height = Math.max(720, doc.documentElement.scrollHeight) + 'px'; };
+        syncHeight();
+        if (window.ResizeObserver) new ResizeObserver(syncHeight).observe(doc.body);
+      } catch (ignore) {}
+    });
+    app.appendChild(frame);
     return app;
   }
   function renderHxbSide(app) {
@@ -655,12 +680,50 @@
       if (btns[i].textContent.trim() === name) { btns[i].click(); return; }
     }
   }
-  function goBasic(section, tab) {
-    hxb.section = section; hxb.article = null;
-    if (tab) hxb.tab = tab;
-    goNav('基础服务');
+  var migratedBasicTarget = '/basic-service/basic-service-home.html';
+  document.addEventListener('open-migrated-basic', function (event) {
+    var target = event && event.detail && event.detail.path;
+    if (!target) return;
+    migratedBasicTarget = target;
+    var shell = document.querySelector('.site-shell');
+    var main = document.querySelector('main');
+    if (!shell || !main) return;
+    shell.setAttribute('data-view', 'basic');
     var app = document.getElementById('hxb-app');
-    if (app) { renderHxbSide(app); renderHxbMain(app); }
+    if (!app) {
+      main.appendChild(buildBasicApp());
+      app = document.getElementById('hxb-app');
+    }
+    var frame = app && app.querySelector('iframe');
+    if (frame && frame.getAttribute('src') !== target) frame.src = target;
+  });
+  function goBasic(section, tab) {
+    var target = '/basic-service/basic-service-home.html';
+    if (section === 'consult') target = '/basic-service/consulting-center.html';
+    if (section === 'events') target = '/basic-service/service-hubs.html#activity';
+    if (section === 'talent') target = '/basic-service/service-hubs.html#talent';
+    migratedBasicTarget = target;
+    goNav('基础服务');
+    var frame = document.querySelector('#hxb-app iframe');
+    if (frame) frame.src = target;
+  }
+
+  function decorateBasicWorkspace(main, view) {
+    var panel = document.getElementById('hx-basic-workspace-summary');
+    if (view !== 'workspace') { if (panel) panel.remove(); return; }
+    if (panel || !main) return;
+    panel = el('section', 'hx-basic-workspace-summary panel',
+      '<div><small>BASIC SERVICES</small><h2>基础服务记录</h2><p>查看咨询申请、课程学习、活动预约和人才服务进度</p></div>' +
+      '<dl><div><dt>在办申请</dt><dd>2</dd></div><div><dt>我的活动</dt><dd>1</dd></div><div><dt>学习中课程</dt><dd>2</dd></div><div><dt>关注服务</dt><dd>1</dd></div></dl>' +
+      '<button type="button">进入基础服务工作台 ›</button>');
+    panel.querySelector('button').addEventListener('click', function () {
+      var app = document.getElementById('hxb-app');
+      migratedBasicTarget = '/basic-service/index.html#workbench';
+      var shell = document.querySelector('.site-shell');
+      shell.setAttribute('data-view', 'basic');
+      if (!app) main.appendChild(buildBasicApp());
+    });
+    main.insertBefore(panel, main.firstElementChild);
   }
 
   var HW_BANNERS = [
