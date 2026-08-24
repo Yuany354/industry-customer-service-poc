@@ -418,6 +418,16 @@
         var apiApp = document.getElementById('hxa-app');
         if (apiApp) apiApp.remove();
       }
+
+      /* 智能交易工作台：替换原占位工作台；交易接入服务页面保持原样 */
+      var tradeApp = document.getElementById('hxt-app');
+      if (view === 'smart') {
+        var legacy = $('.legacy-trading', shell);
+        if (legacy && (!tradeApp || tradeApp.parentNode !== legacy.parentNode)) {
+          if (tradeApp) tradeApp.remove();
+          legacy.parentNode.insertBefore(buildTradeApp(), legacy);
+        }
+      } else if (tradeApp) tradeApp.remove();
     }
 
     /* 下拉二级菜单：元素只建一次，但激活项高亮需每次 decorate 同步 */
@@ -1811,6 +1821,197 @@
   }
 
   /* ==========================================================
+     智能交易工作台（hxt）：资金条 / 行情面板（二级目录） / 交易面板 / 状态条
+     ========================================================== */
+  var hxt = { tab: '自选', chip: '全部', sel: null, side: '买', off: '开仓', ptab: '持仓列表' };
+  /* 品种定义：[代码, 名称, 交易所, 参考价, 是否夜盘, 小数位]（虚构演示数据） */
+  var HXT_VARS = [
+    ['rb', '螺纹', '上期所', 3045, 1, 0], ['hc', '热卷', '上期所', 3120, 1, 0], ['cu', '沪铜', '上期所', 78420, 1, 0],
+    ['al', '沪铝', '上期所', 20640, 1, 0], ['au', '沪金', '上期所', 798.6, 1, 2], ['ag', '沪银', '上期所', 9180, 1, 0],
+    ['i', '铁矿', '大商所', 812, 1, 1], ['j', '焦炭', '大商所', 1976, 1, 1], ['jm', '焦煤', '大商所', 1289, 1, 1],
+    ['m', '豆粕', '大商所', 2987, 1, 0], ['p', '棕榈油', '大商所', 8456, 1, 0], ['l', '塑料', '大商所', 7420, 1, 0],
+    ['TA', 'PTA', '郑商所', 4873, 1, 0], ['MA', '甲醇', '郑商所', 2391, 1, 0], ['SR', '白糖', '郑商所', 5823, 0, 0],
+    ['CF', '棉花', '郑商所', 13960, 0, 0], ['FG', '玻璃', '郑商所', 1248, 1, 0], ['SA', '纯碱', '郑商所', 1462, 1, 0],
+    ['sc', '原油', '能源中心', 542.8, 1, 1], ['nr', '20号胶', '能源中心', 12480, 1, 0],
+    ['lc', '碳酸锂', '广期所', 86750, 0, 0], ['si', '工业硅', '广期所', 9320, 0, 0],
+    ['IF', '沪深300', '中金所', 4128, 0, 1], ['T', '10年国债', '中金所', 106.8, 0, 3]
+  ];
+  var HXT_MONTHS = ['2610', '2701'];
+  var HXT_TABS = ['自选', '主力', '夜盘', '上期所', '大商所', '郑商所', '能源中心', '广期所', '中金所'];
+  var HXT_SELFC = ['rb2610', 'i2610', 'cu2610', 'TA2610', 'm2610', 'au2610', 'sc2610', 'FG2610'];
+  var HXT_SYMS = [];
+  HXT_VARS.forEach(function (v, vi) {
+    HXT_MONTHS.forEach(function (mo, mi) {
+      HXT_SYMS.push({ code: v[0] + mo, name: v[1] + mo, ex: v[2], product: v[1], base: v[3], night: !!v[4], d: v[5], main: mi === 0, seed: vi * 7 + mi * 3 + 11 });
+    });
+  });
+  function hxtSeed(n) { var x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+  function hxtFmt(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function hxtQuote(s) {
+    if (s.q) return s.q;
+    var r1 = hxtSeed(s.seed), r2 = hxtSeed(s.seed + 3), r3 = hxtSeed(s.seed + 7), r4 = hxtSeed(s.seed + 11);
+    var settle = s.base;
+    var last = settle * (1 + (r1 - 0.46) * 0.024);
+    var open = settle * (1 + (r2 - 0.5) * 0.01);
+    var step = Math.pow(10, -s.d);
+    var t = function (n) { return Math.round(n / step) * step; };
+    s.q = {
+      last: t(last), open: t(open),
+      chg: t(last - settle), pct: (last - settle) / settle * 100,
+      bid: t(last - step), ask: t(last + step),
+      limitUp: t(settle * 1.06), limitDn: t(settle * 0.94),
+      vol: Math.round(r2 * 880000 + 62000),
+      oi: Math.round(r3 * 2800000 + 180000),
+      oiChg: Math.round((r4 - 0.5) * 52000)
+    };
+    return s.q;
+  }
+  function hxtTabList() {
+    var t = hxt.tab;
+    if (t === '自选') return HXT_SYMS.filter(function (s) { return HXT_SELFC.indexOf(s.code) >= 0; });
+    if (t === '主力') return HXT_SYMS.filter(function (s) { return s.main; });
+    if (t === '夜盘') return HXT_SYMS.filter(function (s) { return s.night && s.main; });
+    return HXT_SYMS.filter(function (s) { return s.ex === t; });
+  }
+  function hxtRow(s) {
+    var q = hxtQuote(s);
+    var cls = q.chg > 0 ? 'up' : (q.chg < 0 ? 'down' : '');
+    var oc = q.oiChg > 0 ? 'up' : (q.oiChg < 0 ? 'down' : '');
+    return '<tr data-code="' + s.code + '" class="' + (hxt.sel === s.code ? 'on' : '') + '">' +
+      '<td class="code">' + s.code + '</td>' +
+      '<td class="nm">' + s.name + '</td>' +
+      '<td class="' + cls + '">' + hxtFmt(q.last, s.d) + '</td>' +
+      '<td class="' + cls + '">' + (q.chg > 0 ? '+' : '') + hxtFmt(q.chg, s.d) + '</td>' +
+      '<td class="' + cls + '">' + (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%</td>' +
+      '<td>' + hxtFmt(q.bid, s.d) + '</td><td>' + hxtFmt(q.ask, s.d) + '</td>' +
+      '<td>' + (q.vol / 10000).toFixed(2) + '万</td><td>' + (q.oi / 10000).toFixed(2) + '万</td>' +
+      '<td class="' + oc + '">' + (q.oiChg > 0 ? '+' : '') + q.oiChg.toLocaleString('en-US') + '</td>' +
+      '<td>' + hxtFmt(q.open, s.d) + '</td><td>' + hxtFmt(s.base, s.d) + '</td></tr>';
+  }
+  var HXT_FUND = [['账号', '8888****0114', ''], ['可用资金', '1,286,540', ''], ['平仓盈亏', '+3,120', 'up'], ['持仓盈亏', '-8,650', 'down'], ['动态权益', '2,431,800', ''], ['占用保证金', '1,086,260', ''], ['下单冻结', '0', ''], ['风险度', '44.7%', '']];
+  var HXT_POS_HEAD = ['合约', '买卖', '开平', '总持仓', '持仓均价', '持仓盈亏', '浮动盈亏', '保证金', '交易所'];
+  var HXT_POS_ROWS = [
+    ['rb2610', '<span class="up">买</span>', '开', 12, '2,986', '<span class="up">+18,460</span>', '<span class="up">+7,080</span>', '21,500', '上期所'],
+    ['i2610', '<span class="down">卖</span>', '开', 8, '828.5', '<span class="down">-6,320</span>', '<span class="down">-12,400</span>', '33,140', '大商所'],
+    ['au2610', '<span class="up">买</span>', '开', 3, '786.20', '<span class="up">+9,840</span>', '<span class="up">+37,080</span>', '71,460', '上期所'],
+    ['TA2610', '<span class="up">买</span>', '平', 6, '4,812', '<span class="up">+2,150</span>', '<span class="down">-3,660</span>', '14,620', '郑商所']
+  ];
+  var HXT_ORD_HEAD = ['合约', '买卖', '开平', '价格', '数量', '已成', '状态'];
+  var HXT_ORD_ROWS = [
+    ['m2610', '<span class="up">买</span>', '开', '2,972', 10, 6, '部分成交'],
+    ['FG2610', '<span class="down">卖</span>', '开', '1,266', 5, 5, '已成交']
+  ];
+  var HXT_DEAL_HEAD = ['合约', '买卖', '开平', '成交价', '成交量', '成交时间'];
+  var HXT_DEAL_ROWS = [
+    ['m2610', '<span class="up">买</span>', '开', '2,972', 6, '09:31:24'],
+    ['cu2610', '<span class="down">卖</span>', '平', '78,540', 2, '10:02:47'],
+    ['SA2610', '<span class="up">买</span>', '开', '1,458', 4, '10:26:03']
+  ];
+  function buildTradeApp() {
+    var app = el('div', ''); app.id = 'hxt-app';
+    app.innerHTML =
+      '<div class="hxt-fund">' + HXT_FUND.map(function (f) { return '<div><span>' + f[0] + '</span><b class="' + f[2] + '">' + f[1] + '</b></div>'; }).join('') + '</div>' +
+      '<div class="hxt-card hxt-market">' +
+        '<div class="hxt-mh"><b>实时行情</b><span>延时行情 · 模拟演示数据，不提供真实下单</span></div>' +
+        '<div class="hxt-tabs"></div><div class="hxt-chips"></div>' +
+        '<div class="hxt-twrap"><table class="hxt-table"><thead><tr>' +
+        ['合约', '合约名', '最新价', '涨跌', '涨跌幅', '买价', '卖价', '成交量', '持仓量', '持仓增减', '今开', '昨结'].map(function (h) { return '<th>' + h + '</th>'; }).join('') +
+        '</tr></thead><tbody></tbody></table></div>' +
+      '</div>' +
+      '<div class="hxt-trade">' +
+        '<div class="hxt-card hxt-order">' +
+          '<div class="hxt-oh"><b>模拟交易</b><span>模拟账号 8888****0114</span></div>' +
+          '<div class="hxt-orow"><label>合约</label><input class="hxt-contract" readonly></div>' +
+          '<div class="hxt-seg"><button data-side="买" class="on buy">买</button><button data-side="卖">卖</button></div>' +
+          '<div class="hxt-seg"><button data-off="开仓" class="on plain">开仓</button><button data-off="平仓">平仓</button></div>' +
+          '<div class="hxt-orow"><label>手数</label><input class="hxt-qty" value="1"><label>价格</label><input placeholder="对手价"></div>' +
+          '<div class="hxt-glance"></div>' +
+          '<button class="hxt-submit buy">买入开仓</button>' +
+        '</div>' +
+        '<div class="hxt-card hxt-pos"><div class="hxt-ptabs"></div><div class="hxt-pbody"></div></div>' +
+      '</div>' +
+      '<div class="hxt-state"><i></i><b>已连接</b><span>· 延时行情 · 模拟环境</span></div>';
+    app.addEventListener('click', function (e) {
+      var t = e.target instanceof Element ? e.target : null;
+      if (!t) return;
+      var tr = t.closest('tr[data-code]');
+      if (tr) { hxt.sel = tr.getAttribute('data-code'); renderHxt(app); return; }
+      var b = t.closest('button');
+      if (!b) return;
+      if (b.hasAttribute('data-htab')) { hxt.tab = b.getAttribute('data-htab'); hxt.chip = '全部'; renderHxt(app); return; }
+      if (b.hasAttribute('data-chip')) { hxt.chip = b.getAttribute('data-chip'); renderHxt(app); return; }
+      if (b.hasAttribute('data-side')) { hxt.side = b.getAttribute('data-side'); renderHxt(app); return; }
+      if (b.hasAttribute('data-off')) { hxt.off = b.getAttribute('data-off'); renderHxt(app); return; }
+      if (b.hasAttribute('data-ptab')) { hxt.ptab = b.getAttribute('data-ptab'); renderHxt(app); return; }
+      if (b.classList.contains('hxt-submit')) {
+        var qty = ($('.hxt-qty', app) || {}).value || '1';
+        toast('模拟委托已提交：' + hxt.side + hxt.off + ' ' + (hxt.sel || '--') + ' × ' + qty + ' 手（演示）');
+      }
+    });
+    renderHxt(app);
+    return app;
+  }
+  function renderHxt(app) {
+    $('.hxt-tabs', app).innerHTML = HXT_TABS.map(function (t) {
+      return '<button data-htab="' + t + '" class="' + (t === hxt.tab ? 'active' : '') + '">' + t + '</button>';
+    }).join('');
+    var base = hxtTabList();
+    var chips = ['全部'];
+    base.forEach(function (s) { if (chips.indexOf(s.product) < 0) chips.push(s.product); });
+    if (chips.indexOf(hxt.chip) < 0) hxt.chip = '全部';
+    $('.hxt-chips', app).innerHTML = chips.map(function (c) {
+      return '<button data-chip="' + c + '" class="' + (c === hxt.chip ? 'active' : '') + '">' + c + '</button>';
+    }).join('');
+    var list = hxt.chip === '全部' ? base : base.filter(function (s) { return s.product === hxt.chip; });
+    if (!hxt.sel || !list.some(function (s) { return s.code === hxt.sel; })) hxt.sel = list.length ? list[0].code : null;
+    $('tbody', app).innerHTML = list.map(hxtRow).join('');
+    renderHxtOrder(app);
+    renderHxtPos(app);
+  }
+  function hxtSym(code) {
+    var s = null;
+    HXT_SYMS.forEach(function (x) { if (x.code === code) s = x; });
+    return s;
+  }
+  function renderHxtOrder(app) {
+    var s = hxtSym(hxt.sel);
+    $('.hxt-contract', app).value = s ? s.code + ' ' + s.name : '--';
+    var gl = $('.hxt-glance', app);
+    if (s) {
+      var q = hxtQuote(s);
+      gl.innerHTML = [['涨停', q.limitUp, 'up'], ['卖一', q.ask, 'up'], ['买一', q.bid, 'down'], ['跌停', q.limitDn, 'down']].map(function (g) {
+        return '<span>' + g[0] + '<b class="' + g[2] + '">' + hxtFmt(g[1], s.d) + '</b></span>';
+      }).join('');
+    } else gl.innerHTML = '';
+    $all('[data-side]', app).forEach(function (b) {
+      var on = b.getAttribute('data-side') === hxt.side;
+      b.className = on ? 'on ' + (hxt.side === '买' ? 'buy' : 'sell') : '';
+    });
+    $all('[data-off]', app).forEach(function (b) {
+      b.className = b.getAttribute('data-off') === hxt.off ? 'on plain' : '';
+    });
+    var sub = $('.hxt-submit', app);
+    sub.textContent = (hxt.side === '买' ? '买入' : '卖出') + hxt.off;
+    sub.className = 'hxt-submit ' + (hxt.side === '买' ? 'buy' : 'sell');
+  }
+  function renderHxtPos(app) {
+    var tabs = ['持仓列表', '未成交', '委托列表', '成交列表'];
+    $('.hxt-ptabs', app).innerHTML = tabs.map(function (t) {
+      return '<button data-ptab="' + t + '" class="' + (t === hxt.ptab ? 'active' : '') + '">' + t + '</button>';
+    }).join('');
+    var head = HXT_POS_HEAD, rows = HXT_POS_ROWS;
+    if (hxt.ptab === '未成交') { head = HXT_ORD_HEAD; rows = []; }
+    if (hxt.ptab === '委托列表') { head = HXT_ORD_HEAD; rows = HXT_ORD_ROWS; }
+    if (hxt.ptab === '成交列表') { head = HXT_DEAL_HEAD; rows = HXT_DEAL_ROWS; }
+    var body = $('.hxt-pbody', app);
+    if (!rows.length) { body.innerHTML = '<div class="hxt-empty">今日暂无未成交委托</div>'; return; }
+    body.innerHTML = '<div class="hxt-twrap"><table class="hxt-table"><thead><tr>' +
+      head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }).join('') +
+      '</tbody></table></div>';
+  }
+
+  /* ==========================================================
      启动
      ========================================================== */
   /* 一级导航点击：切走其他栏目时重置子板块；点「投研支持」保留子板块状态 */
@@ -1829,6 +2030,16 @@
   /* 深链直达二级板块（演示与验收截图用；React 水合前点击无效，重试直至视图切换） */
   function applyHash() {
     var h = (location.hash || '').replace('#', '');
+    if (h === 'smart') {
+      var st = 0;
+      (function gos() {
+        var shell = $('.site-shell');
+        if (shell && shell.getAttribute('data-view') === 'smart') { decorate(); return; }
+        goNav('智能交易');
+        if (st++ < 20) setTimeout(gos, 250);
+      })();
+      return;
+    }
     var pm = h.match(/!p(\d+)$/);
     if (pm) { hxd.page = parseInt(pm[1], 10) || 1; h = h.slice(0, pm[0].length * -1); }
     var mode = h === 'research-analyst' ? 'analyst' : (h === 'research-reports' ? 'reports' : (h === 'research-weekly' ? 'weekly' : (h === 'research-overview' ? 'overview' : (h === 'research-api' ? 'api' : ''))));
