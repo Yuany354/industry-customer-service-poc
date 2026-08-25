@@ -386,17 +386,30 @@
 .hw-dots button{width:8px;height:8px;border-radius:50%;border:0;background:rgba(255,255,255,.45);cursor:pointer;padding:0}
 .hw-dots button.on{background:#fff;width:18px;border-radius:4px}
 /* 我的工作台（W1-2） */
-.hw-workbench{padding:14px 18px 8px}
+.hw-workbench{padding:14px 18px 12px;align-self:stretch}
 .hw-workbench .block-title{margin-bottom:2px}
-.hw-wb-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(0,0,0,.06);padding:10px 2px;font-size:13px;cursor:pointer}
-.hw-wb-item:last-child{border-bottom:0}
+.hw-wb-tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(0,0,0,.06)}
+.hw-wb-item{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;text-align:center;background:none;border:0;border-bottom:2px solid transparent;padding:8px 2px;font-size:12px;cursor:pointer}
+.hw-wb-item.active{border-bottom-color:var(--blue,#143c6b);background:var(--soft-blue,#eef3f8)}
 .hw-wb-item b{flex:none;font-weight:600;color:var(--ink,#1b2a3e)}
-.hw-wb-item span{flex:1;color:var(--muted,#6d7989);font-size:12px}
 .hw-wb-item em{flex:none;font-style:normal;font-size:11px;background:var(--soft-blue,#eef3f8);color:var(--blue,#143c6b);border-radius:4px;padding:2px 7px}
 .hw-wb-item em.warn{background:#fbf3e6;color:#8a5a17}
 .hw-wb-item em.dot{background:var(--red,#b94b45);color:#fff;min-width:16px;text-align:center}
 .hw-wb-item i{flex:none;color:var(--muted,#6d7989);font-style:normal}
 .hw-wb-item:hover b{color:var(--blue,#143c6b)}
+.hw-wb-preview{padding-top:9px}
+.hw-wb-preview>header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.hw-wb-preview>header b{font-size:12px;color:var(--ink,#1b2a3e)}
+.hw-wb-preview>header button{border:0;background:none;color:var(--blue,#143c6b);font-size:11px;cursor:pointer}
+.hw-wb-task{display:grid;grid-template-columns:6px 1fr auto 8px;align-items:center;gap:8px;width:100%;padding:6px 3px;border:0;border-top:1px solid rgba(0,0,0,.05);background:none;text-align:left;cursor:pointer;border-radius:3px}
+.hw-wb-task:hover,.hw-wb-task:focus{background:var(--soft-blue,#eef3f8);outline:none}
+.hw-wb-task>i{width:6px;height:6px;border-radius:50%;background:var(--blue,#143c6b)}
+.hw-wb-task>span{display:block;min-width:0}
+.hw-wb-task strong,.hw-wb-task small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hw-wb-task strong{font-size:11px;color:var(--ink,#1b2a3e);margin-bottom:2px}
+.hw-wb-task small{font-size:10px;color:var(--muted,#6d7989)}
+.hw-wb-task>em{font-style:normal;font-size:10px;color:var(--blue,#143c6b);background:var(--soft-blue,#eef3f8);padding:2px 5px;border-radius:3px}
+.hw-wb-task>b{color:var(--muted,#6d7989);font-size:14px}
 /* 金刚区（W1-1） */
 .hw-kingkong{padding:14px 18px 16px;margin-bottom:16px}
 .hw-king-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
@@ -443,15 +456,23 @@
    保留原投研支持页框架，仅替换右侧内容列；
    颜色全部映射 guojun-institution-ui 命名 token
    ============================================================ */
-.research-layout.hxr-on > div:not(#hxr-app):not(#hxd-app):not(#hxw-app):not(#hxa-app){display:none !important}
+.research-layout.hxr-on > div:not(#hxr-app):not(#hxd-app):not(#hxwk-app):not(#hxa-app){display:none !important}
 /* 二级目录移至顶部下拉菜单：原侧栏隐藏，单列占满整页 */
 .research-layout{grid-template-columns:1fr !important}
 .research-layout > aside{display:none !important}
-/* 投研支持 hover 下拉二级菜单（fixed 定位跟随导航按钮） */
-#hx-drop{position:fixed;z-index:80;min-width:172px;background:var(--gj-color-surface,#fff);border:1px solid var(--gj-color-border,rgba(0,0,0,.1));border-radius:8px;box-shadow:0 8px 24px rgba(9,30,56,.14);padding:6px;display:flex;flex-direction:column;gap:2px}
-#hx-drop button{text-align:left;padding:9px 14px;font-size:14px;color:var(--gj-color-text-body,rgba(0,0,0,.65));background:none;border:none;border-radius:6px;cursor:pointer;transition:background .12s,color .12s}
-#hx-drop button:hover{background:rgba(0,89,236,.06);color:var(--gj-color-brand-primary,#0059ec)}
-#hx-drop button.active{color:var(--gj-color-brand-primary,#0059ec);background:rgba(0,89,236,.09);font-weight:600}
+/* 投研支持 hover 下拉二级菜单：对齐基础服务 mega menu 展示形式 */
+#hx-drop.research-mega{display:none;position:absolute;z-index:970;left:0;right:0;top:100%;background:#fff;border-top:3px solid var(--gj-color-brand-primary,#0059ec);border-bottom:1px solid var(--line,#dce2e9);box-shadow:0 12px 28px rgba(20,45,80,.14);padding:0 28px 22px}
+#hx-drop.research-mega.open{display:block}
+#hx-drop.research-mega button{cursor:pointer}
+#hx-drop .research-mega-home{display:flex;justify-content:space-between;width:100%;padding:13px 12px;border:0;border-bottom:1px solid var(--line,#dce2e9);background:#f5f8fd;color:var(--gj-color-brand-primary,#0059ec);font-weight:600;text-align:left}
+#hx-drop .research-mega-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding-top:18px}
+#hx-drop .research-mega-grid>div{padding:0 24px;border-right:1px solid var(--line,#dce2e9)}
+#hx-drop .research-mega-grid>div:last-child{border-right:0}
+#hx-drop h3{font-size:15px;margin:0 0 8px;color:var(--gj-color-text-heading,rgba(0,0,0,.88))}
+#hx-drop .research-mega-grid button{display:block;width:100%;border:0;background:none;text-align:left;padding:7px 0;color:var(--gj-color-text-body,rgba(0,0,0,.6));font-size:13px}
+#hx-drop .research-mega-grid button:hover,
+#hx-drop .research-mega-grid button.active{color:var(--gj-color-brand-primary,#0059ec)}
+#hx-drop .research-mega-grid button.active{font-weight:600}
 #hxr-app{min-width:0;display:flex;flex-direction:column;gap:16px}
 
 /* ---------- 板块筛选 + 搜索 ---------- */
@@ -821,7 +842,7 @@
    周度观点 · 策略信号工作台（hxw-）
    基本面观点（日/周/月）· 多因子择时 · 套保信号
    ============================================================ */
-#hxw-app{min-width:0;display:flex;flex-direction:column;gap:14px}
+#hxwk-app{min-width:0;display:flex;flex-direction:column;gap:14px}
 .hxw-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 .hxw-top b{font-size:17px;color:var(--gj-color-text-tab,rgba(0,0,0,.9))}
 .hxw-top>span{font-size:12px;color:var(--gj-color-text-aux,rgba(0,0,0,.45))}
@@ -906,9 +927,11 @@ section.legacy-trading{display:none !important}
 .hxt-fund b.up{color:var(--gj-color-up,#ef3432)}
 .hxt-fund b.down{color:var(--gj-color-down,#05b96a)}
 /* 行情面板 */
-.hxt-mh{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0}
+.hxt-mh{display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:12px 16px 0}
 .hxt-mh b{font-size:16px;font-weight:600;color:var(--gj-color-text-tab,rgba(0,0,0,.9))}
-.hxt-mh span{font-size:12px;color:var(--gj-color-text-aux,rgba(0,0,0,.45))}
+.hxt-mh span{margin-left:auto;font-size:12px;color:var(--gj-color-text-aux,rgba(0,0,0,.45))}
+.hxt-download-entry{height:30px;padding:0 14px;border:1px solid var(--gj-color-brand-primary,#0059ec);border-radius:6px;background:#fff;color:var(--gj-color-brand-primary,#0059ec);font-size:13px;font-weight:600;cursor:pointer}
+.hxt-download-entry:hover{background:rgba(0,89,236,.06)}
 .hxt-tabs{display:flex;gap:24px;padding:8px 16px 0;border-bottom:1px solid var(--gj-color-border,rgba(0,0,0,.12));overflow-x:auto}
 .hxt-tabs button{position:relative;padding:8px 2px 10px;font-size:15px;font-weight:600;color:var(--gj-color-text-body,rgba(0,0,0,.65));background:none;border:none;cursor:pointer;white-space:nowrap}
 .hxt-tabs button:hover{color:var(--gj-color-brand-primary,#0059ec)}
@@ -978,3 +1001,8 @@ section.legacy-trading{display:none !important}
 }
 /* 顶部主导航不再展示产业咨询入口；页面能力保留供既有内容引用。 */
 .main-header nav>button:nth-child(2){display:none!important}
+/* 隐藏演示数据说明条。 */
+.data-disclaimer,.prototype-notice{display:none!important}
+/* 智能交易、投研支持页直接展示功能内容，不再展示顶部栏目说明。 */
+.tool-page.smart-page>.wrap>.tool-title,
+.tool-page.research-page>.wrap>.tool-title{display:none!important}

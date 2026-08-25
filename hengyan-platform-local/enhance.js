@@ -151,6 +151,7 @@
     document.body.appendChild(msgPanel);
   }
   function renderMsgPanel(tab) {
+    if (!msgPanel || !msgPanel.isConnected) buildMsgPanel();
     var tabs = [['biz', '业务状态'], ['risk', '风控通知'], ['content', '内容更新']];
     msgPanel.innerHTML =
       '<header><b>消息中心</b><button data-close="1">✕</button></header>' +
@@ -272,7 +273,7 @@
   /* ==========================================================
      首页 · 现货报价紧凑卡（参考华泰天玑现货报价结构）
      - 收敛为「报价列表/我的监控」两 Tab；申请与提醒记录归平台统一模块
-     - 基差/涨跌：正红负绿；免责声明常驻；查看更多 → 投研支持
+     - 基差/涨跌：正红负绿；免责声明常驻；查看更多 → 独立关注品种现货页
      ========================================================== */
   var hxq = { tab: 'list', alerts: {} };
   var HX_QUOTES = {
@@ -312,7 +313,7 @@
     p.innerHTML =
       '<div class="hxq-head"><h2>现货报价</h2>' +
       '<small>不构成投资建议，据此操作，风险自担。</small>' +
-      '<button class="hxq-more">查看更多 现货数据 →</button></div>' +
+      '<button class="hxq-more">更多 ›</button></div>' +
       '<div class="hxq-tabs">' +
       '<button data-t="list" class="' + (hxq.tab === 'list' ? 'on' : '') + '">报价列表</button>' +
       '<button data-t="watch" class="' + (hxq.tab === 'watch' ? 'on' : '') + '">我的监控</button></div>' +
@@ -322,10 +323,7 @@
       b.addEventListener('click', function () { hxq.tab = b.dataset.t; renderHxq(p); });
     });
     $('.hxq-more', p).addEventListener('click', function () {
-      var btns = document.querySelectorAll('.main-header nav button');
-      for (var i = 0; i < btns.length; i++) {
-        if (btns[i].textContent.trim() === '投研支持') { btns[i].click(); return; }
-      }
+      location.href = '/spot-market.html';
     });
     $$('.hxq-alert', p).forEach(function (b) {
       b.addEventListener('click', function () {
@@ -393,8 +391,8 @@
         var rLayout = $('.research-layout', shell);
         if (rLayout) {
           rLayout.classList.toggle('hxr-on', !!hxr.mode);
-          var wantId = hxr.mode === 'analyst' ? 'hxr-app' : (hxr.mode === 'reports' ? 'hxd-app' : (hxr.mode === 'weekly' ? 'hxw-app' : (hxr.mode === 'api' ? 'hxa-app' : '')));
-          ['hxr-app', 'hxd-app', 'hxw-app', 'hxa-app'].forEach(function (id) {
+          var wantId = hxr.mode === 'analyst' ? 'hxr-app' : (hxr.mode === 'reports' ? 'hxd-app' : (hxr.mode === 'weekly' ? 'hxwk-app' : (hxr.mode === 'api' ? 'hxa-app' : '')));
+          ['hxr-app', 'hxd-app', 'hxwk-app', 'hxa-app'].forEach(function (id) {
             var n = document.getElementById(id);
             if (id !== wantId && n) n.remove();
           });
@@ -402,7 +400,7 @@
             var cur = document.getElementById(wantId);
             if (!cur || cur.parentNode !== rLayout) {
               if (cur) cur.remove();
-              rLayout.appendChild(wantId === 'hxr-app' ? buildResearchApp() : (wantId === 'hxd-app' ? buildReportApp() : (wantId === 'hxw-app' ? buildWeeklyApp() : buildApiApp())));
+              rLayout.appendChild(wantId === 'hxr-app' ? buildResearchApp() : (wantId === 'hxd-app' ? buildReportApp() : (wantId === 'hxwk-app' ? buildWeeklyApp() : buildApiApp())));
             }
           }
         }
@@ -413,7 +411,7 @@
         if (researchApp) researchApp.remove();
         var reportApp = document.getElementById('hxd-app');
         if (reportApp) reportApp.remove();
-        var weeklyApp = document.getElementById('hxw-app');
+        var weeklyApp = document.getElementById('hxwk-app');
         if (weeklyApp) weeklyApp.remove();
         var apiApp = document.getElementById('hxa-app');
         if (apiApp) apiApp.remove();
@@ -718,7 +716,7 @@
         Banner 轮播 + 我的工作台聚合(W1-2) + 金刚区(W1-1)
         + 产业投研精选(W1-4) + 政策解读 + 采销速览(W1-3) + 研究与活动(W1-5)
      ========================================================== */
-  var hw = { slide: 0, timer: null, lastSigned: null };
+  var hw = { slide: 0, timer: null, lastSigned: null, workbenchPreview: 'biz' };
 
   function goNav(name) {
     var btns = document.querySelectorAll('.main-header nav button');
@@ -845,21 +843,84 @@
   /* 我的工作台（W1-2：聚合各模块申请单状态，不在首页另建状态） */
   function renderHwWorkbench(app) {
     var w = $('.hw-workbench', app);
+    var previews = {
+      biz: {
+        title: '在办业务待办',
+        items: [
+          ['铜原料采购敞口管理', '顾问方案待确认 · 今天 16:00', '跟进中', 'applications'],
+          ['华东地区电解铜采购需求', '等待确认交货窗口 · 08月26日', '已受理', 'applications']
+        ]
+      },
+      risk: {
+        title: '风控通知待办',
+        items: [
+          ['沪铜持仓风险度接近预警线', '风险度 85% · 11:02', '需关注', 'risk'],
+          ['螺纹钢保证金比例调整', '新比例 9% · 明日生效', '待确认', 'risk']
+        ]
+      },
+      follow: {
+        title: '我的关注更新',
+        items: [
+          ['周正发布铜产业链最新观点', '有色研究 · 12分钟前', '新观点', 'analyst-zz'],
+          ['华东铜升贴水触发关注阈值', '当前 +120 元/吨 · 35分钟前', '已触发', 'indicators']
+        ]
+      }
+    };
+    var active = previews[hw.workbenchPreview];
+    var previewHtml = active ? '<section class="hw-wb-preview"><header><b>' + active.title + '</b><button data-w-detail="' + hw.workbenchPreview + '">查看全部 ›</button></header>' +
+      active.items.map(function (item) {
+        return '<button type="button" class="hw-wb-task" data-w-item="' + item[3] + '"><i></i><span><strong>' + item[0] + '</strong><small>' + item[1] + '</small></span><em>' + item[2] + '</em><b>›</b></button>';
+      }).join('') + '</section>' : '';
     w.innerHTML =
       '<div class="block-title"><div><h2>我的工作台</h2></div>' +
       '<button class="link-button" data-w="all">全部记录 ›</button></div>' +
-      '<button class="hw-wb-item" data-w="biz" data-need-sign="1"><b>在办业务</b><em>3 项</em><i>›</i></button>' +
-      '<button class="hw-wb-item" data-w="risk" data-need-sign="1"><b>风控通知</b><em class="warn">⚠ 2</em><i>›</i></button>' +
-      '<button class="hw-wb-item" data-w="follow"><b>我的关注</b><em class="dot">7</em><span>复用研报关注链路</span><i>›</i></button>';
+      '<div class="hw-wb-tabs">' +
+      '<button class="hw-wb-item' + (hw.workbenchPreview === 'biz' ? ' active' : '') + '" data-w="biz"><b>在办业务</b><em>3 项</em><i>›</i></button>' +
+      '<button class="hw-wb-item' + (hw.workbenchPreview === 'risk' ? ' active' : '') + '" data-w="risk"><b>风控通知</b><em class="warn">⚠ 2</em><i>›</i></button>' +
+      '<button class="hw-wb-item' + (hw.workbenchPreview === 'follow' ? ' active' : '') + '" data-w="follow"><b>我的关注</b><em class="dot">7</em><i>›</i></button></div>' + previewHtml;
     var acts = {
       all: function () { var b = $('.workspace-entry'); if (b) b.click(); },
-      biz: function () { var b = $('.workspace-entry'); if (b) b.click(); },
-      risk: function () { renderMsgPanel('risk'); msgPanel.classList.add('open'); },
-      follow: function () { goNav('投研支持'); }
+      biz: function () { hw.workbenchPreview = 'biz'; renderHwWorkbench(app); },
+      risk: function () { hw.workbenchPreview = 'risk'; renderHwWorkbench(app); },
+      follow: function () { hw.workbenchPreview = 'follow'; renderHwWorkbench(app); }
     };
     $all('[data-w]', w).forEach(function (b) {
       b.addEventListener('click', function () { acts[b.getAttribute('data-w')](); });
     });
+    $all('[data-w-item]', w).forEach(function (b) {
+      b.addEventListener('click', function () { openWorkbenchItem(b.getAttribute('data-w-item')); });
+    });
+    var detail = $('[data-w-detail]', w);
+    if (detail) detail.addEventListener('click', function () {
+      var type = detail.getAttribute('data-w-detail');
+      if (type === 'risk') { renderMsgPanel('risk'); msgPanel.classList.add('open'); return; }
+      if (type === 'follow') { goNav('投研支持'); return; }
+      var entry = $('.workspace-entry'); if (entry) entry.click();
+    });
+  }
+
+  function openWorkspaceFollow(tabName) {
+    var entry = $('.workspace-entry');
+    if (entry) entry.click();
+    var tries = 0;
+    (function seek() {
+      var navButton = $all('.workspace-nav button').filter(function (b) { return b.textContent.indexOf('我的关注') >= 0; })[0];
+      if (!navButton && tries++ < 12) { setTimeout(seek, 80); return; }
+      if (navButton) navButton.click();
+      setTimeout(function () {
+        var tabButton = $all('.follow-tabs button').filter(function (b) { return b.textContent.indexOf(tabName) >= 0; })[0];
+        if (tabButton) tabButton.click();
+      }, 100);
+    })();
+  }
+  function openWorkbenchItem(action) {
+    if (action === 'risk') { renderMsgPanel('risk'); msgPanel.classList.add('open'); return; }
+    if (action === 'analyst-zz') {
+      document.dispatchEvent(new CustomEvent('open-research-analyst', { detail: { id: 'zz' } }));
+      return;
+    }
+    if (action === 'indicators') { openWorkspaceFollow('指标'); return; }
+    var entry = $('.workspace-entry'); if (entry) entry.click();
   }
 
   /* 金刚区（W1-1：按签约状态差异化排序；业务入口未签约点击走签约引导） */
@@ -979,10 +1040,10 @@
   ];
   var HXR_ANALYSTS = [
     { id: 'sw', field: 'black', name: '沈望', title: '首席分析师', role: '黑色研究负责人', cert: 'Z0000001（演示）', varieties: ['螺纹钢', '热轧卷板', '铁矿石'], quote: { name: '螺纹钢主力', code: 'rb2610.SHFE', price: '3,017', chg: '+0.27%', up: true, state: '休盘中' }, intro: '长期深耕黑色产业链研究，擅长将产业供需格局与宏观情绪结合，为产业客户提供采购节奏与套保时机建议。' },
-    { id: 'lz', field: 'black', name: '林知行', title: '高级分析师', cert: 'Z0000002（演示）', varieties: ['铁矿石', '焦煤焦炭'], quote: { name: '铁矿石主力', code: 'i2609.DCE', price: '768.5', chg: '-0.45%', up: false, state: '交易中' }, intro: '聚焦铁矿与煤焦供需平衡表研究，跟踪港口库存与发运节奏，服务多家钢厂原料采购决策。' },
+    { id: 'lz', field: 'black', name: '林洲', title: '高级分析师', cert: 'Z0000002（演示）', varieties: ['铁矿石', '焦煤焦炭'], quote: { name: '铁矿石主力', code: 'i2609.DCE', price: '768.5', chg: '-0.45%', up: false, state: '交易中' }, intro: '聚焦铁矿与煤焦供需平衡表研究，跟踪港口库存与发运节奏，服务多家钢厂原料采购决策。' },
     { id: 'gx', field: 'black', name: '高小满', title: '分析师', cert: 'Z0000003（演示）', varieties: ['螺纹钢', '热轧卷板'], quote: { name: '热轧卷板主力', code: 'hc2610.SHFE', price: '3,251', chg: '+0.18%', up: true, state: '交易中' }, intro: '负责成材端高频数据跟踪与利润测算，输出周度产销与库存快评。' },
     { id: 'zz', field: 'nf', name: '周正', title: '首席分析师', role: '有色研究负责人', cert: 'Z0000004（演示）', varieties: ['沪铜', '沪铝'], quote: { name: '沪铜主力', code: 'cu2609.SHFE', price: '79,240', chg: '+1.26%', up: true, state: '交易中' }, intro: '专注铜铝产业链研究，关注库存去化速度、冶炼利润与供应扰动，为加工企业提供套保与点价建议。' },
-    { id: 'lt', field: 'ec', name: '陆听澜', title: '首席分析师', role: '能化研究负责人', cert: 'Z0000005（演示）', varieties: ['原油', '燃料油', '甲醇'], quote: { name: '原油主力', code: 'sc2610.INE', price: '612.8', chg: '+0.78%', up: true, state: '交易中' }, intro: '覆盖原油及下游能化品种，擅长月差结构与地缘溢价分析，服务炼厂与贸易商风险管理。' },
+    { id: 'lt', field: 'ec', name: '韩熙', title: '首席分析师', role: '能化研究负责人', cert: 'Z0000005（演示）', varieties: ['原油', '燃料油', '甲醇'], quote: { name: '原油主力', code: 'sc2610.INE', price: '612.8', chg: '+0.78%', up: true, state: '交易中' }, intro: '覆盖原油及下游能化品种，擅长月差结构与地缘溢价分析，服务炼厂与贸易商风险管理。' },
     { id: 'cy', field: 'agri', name: '程一粟', title: '高级分析师', cert: 'Z0000006（演示）', varieties: ['豆粕', '棕榈油'], quote: { name: '豆粕主力', code: 'm2609.DCE', price: '3,148', chg: '+0.31%', up: true, state: '交易中' }, intro: '跟踪油脂油料全球供需与天气窗口，输出压榨利润与进口成本测算。' },
     { id: 'gc', field: 'macro', name: '顾沧海', title: '首席宏观分析师', cert: 'Z0000007（演示）', varieties: ['宏观策略'], quote: { name: '沪深300股指', code: 'if2609.CFFEX', price: '4,128.6', chg: '+0.52%', up: true, state: '交易中' }, intro: '负责宏观总量与政策研究，为产业客户的跨品种套保与资产配置提供宏观框架支持。' }
   ];
@@ -1047,8 +1108,22 @@
 
   /* 顶部二级菜单：hover「投研支持」弹出下拉，选中项切换对应子板块，移开鼠标收起 */
   var HX_SUBNAV = ['研报总览', '最新研报', '策略信号', '研究员主页', '指标中心', '专题研究', '数据与 API'];
+  var HX_RESEARCH_MEGAS = [
+    { title: '研究内容', items: ['研报总览', '最新研报'] },
+    { title: '策略工具', items: ['策略信号', '指标中心'] },
+    { title: '专家与专题', items: ['研究员主页', '专题研究'] },
+    { title: '数据服务', items: ['数据与 API'] }
+  ];
   function subnavMode(name) {
     return name === '研究员主页' ? 'analyst' : (name === '最新研报' ? 'reports' : (name === '策略信号' ? 'weekly' : (name === '数据与 API' ? 'api' : '')));
+  }
+  function researchMegaHtml() {
+    return '<button data-nav="研报总览" class="research-mega-home">投研支持首页 <span>查看全部研究服务 ›</span></button>' +
+      '<div class="research-mega-grid">' + HX_RESEARCH_MEGAS.map(function (g) {
+        return '<div><h3>' + g.title + '</h3>' + g.items.map(function (n) {
+          return '<button data-nav="' + n + '">' + n + '</button>';
+        }).join('') + '</div>';
+      }).join('') + '<div><h3>活动与交流</h3><button data-research-path="/basic-service/service-hubs.html#activity">活动中心</button><button data-research-path="/basic-service/service-hubs.html?category=salon#activity">线下会议</button></div></div>';
   }
   function buildNavDrop(shell) {
     var nav = $('.main-header nav', shell);
@@ -1057,19 +1132,18 @@
     $all('button', nav).forEach(function (b) { if (b.textContent.trim() === '投研支持') btn = b; });
     if (!btn) return;
     var drop = document.getElementById('hx-drop');
-    if (!drop) {
-      drop = el('div', ''); drop.id = 'hx-drop';
-      drop.innerHTML = HX_SUBNAV.map(function (n) { return '<button data-nav="' + n + '">' + n + '</button>'; }).join('');
-      document.body.appendChild(drop);
+    var header = $('.main-header', shell);
+    if (drop && drop.parentNode !== header) { drop.remove(); drop = null; }
+    if (!drop && header) {
+      drop = el('section', 'research-mega'); drop.id = 'hx-drop';
+      drop.innerHTML = researchMegaHtml();
+      header.appendChild(drop);
       var timer = 0;
       var show = function () {
         clearTimeout(timer);
-        var r = btn.getBoundingClientRect();
-        drop.style.left = r.left + 'px';
-        drop.style.top = (r.bottom + 6) + 'px';
-        drop.hidden = false;
+        drop.classList.add('open');
       };
-      var hide = function () { clearTimeout(timer); timer = setTimeout(function () { drop.hidden = true; }, 160); };
+      var hide = function () { clearTimeout(timer); timer = setTimeout(function () { drop.classList.remove('open'); }, 160); };
       btn.addEventListener('mouseenter', show);
       btn.addEventListener('mouseleave', hide);
       drop.addEventListener('mouseenter', function () { clearTimeout(timer); });
@@ -1078,9 +1152,17 @@
         b.addEventListener('click', function () {
           hxr.mode = subnavMode(b.getAttribute('data-nav'));
           hxr.page = 1;
-          drop.hidden = true;
+          drop.classList.remove('open');
           goNav('投研支持');
           decorate();
+        });
+      });
+      $all('[data-research-path]', drop).forEach(function (b) {
+        b.addEventListener('click', function () {
+          drop.classList.remove('open');
+          document.dispatchEvent(new CustomEvent('open-migrated-basic', {
+            detail: { path: b.getAttribute('data-research-path') }
+          }));
         });
       });
     }
@@ -1653,7 +1735,7 @@
     return { v: v, chg: chg, sig: sig };
   }
   function buildWeeklyApp() {
-    var app = el('div', ''); app.id = 'hxw-app';
+    var app = el('div', ''); app.id = 'hxwk-app';
     renderHxw(app);
     return app;
   }
@@ -1912,7 +1994,7 @@
     app.innerHTML =
       '<div class="hxt-fund">' + HXT_FUND.map(function (f) { return '<div><span>' + f[0] + '</span><b class="' + f[2] + '">' + f[1] + '</b></div>'; }).join('') + '</div>' +
       '<div class="hxt-card hxt-market">' +
-        '<div class="hxt-mh"><b>实时行情</b><span>延时行情 · 模拟演示数据，不提供真实下单</span></div>' +
+        '<div class="hxt-mh"><b>实时行情</b><span>行情数据</span><button class="hxt-download-entry" type="button">终端下载</button></div>' +
         '<div class="hxt-tabs"></div><div class="hxt-chips"></div>' +
         '<div class="hxt-twrap"><table class="hxt-table"><thead><tr>' +
         ['合约', '合约名', '最新价', '涨跌', '涨跌幅', '买价', '卖价', '成交量', '持仓量', '持仓增减', '今开', '昨结'].map(function (h) { return '<th>' + h + '</th>'; }).join('') +
@@ -1930,7 +2012,7 @@
         '</div>' +
         '<div class="hxt-card hxt-pos"><div class="hxt-ptabs"></div><div class="hxt-pbody"></div></div>' +
       '</div>' +
-      '<div class="hxt-state"><i></i><b>已连接</b><span>· 延时行情 · 模拟环境</span></div>';
+      '<div class="hxt-state"><i></i><b>已连接</b></div>';
     app.addEventListener('click', function (e) {
       var t = e.target instanceof Element ? e.target : null;
       if (!t) return;
@@ -1943,6 +2025,7 @@
       if (b.hasAttribute('data-side')) { hxt.side = b.getAttribute('data-side'); renderHxt(app); return; }
       if (b.hasAttribute('data-off')) { hxt.off = b.getAttribute('data-off'); renderHxt(app); return; }
       if (b.hasAttribute('data-ptab')) { hxt.ptab = b.getAttribute('data-ptab'); renderHxt(app); return; }
+      if (b.classList.contains('hxt-download-entry')) { location.href = '/terminal-download.html'; return; }
       if (b.classList.contains('hxt-submit')) {
         var qty = ($('.hxt-qty', app) || {}).value || '1';
         toast('模拟委托已提交：' + hxt.side + hxt.off + ' ' + (hxt.sel || '--') + ' × ' + qty + ' 手（演示）');
@@ -2058,6 +2141,20 @@
     buildModal();
     buildMsgPanel();
     buildAI();
+    document.addEventListener('open-research-analyst', function (e) {
+      var id = e.detail && e.detail.id;
+      if (!HXR_ANALYSTS.some(function (a) { return a.id === id; })) return;
+      hxr.analystId = id;
+      hxr.mode = 'analyst';
+      hxr.field = 'all';
+      hxr.kw = '';
+      hxr.tab = '观点追踪';
+      hxr.sub = '全部动态';
+      hxr.variety = '全部';
+      hxr.page = 1;
+      goNav('投研支持');
+      setTimeout(decorate, 80);
+    });
     /* 数据说明条：点「我知道了」后收起黄条（原编译产物仅弹 toast） */
     document.addEventListener('click', function (e) {
       var t = e.target;
