@@ -502,6 +502,25 @@
   ];
   var hxb = { section: 'consult', tab: '全部', page: 1, article: null, fav: {}, talentDone: false };
 
+  function resetMigratedBasicScroll(frame) {
+    var reset = function () {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      try {
+        if (frame && frame.contentWindow) frame.contentWindow.scrollTo(0, 0);
+        if (frame && frame.contentDocument) {
+          frame.contentDocument.documentElement.scrollTop = 0;
+          frame.contentDocument.body.scrollTop = 0;
+        }
+      } catch (ignore) {}
+    };
+    reset();
+    window.requestAnimationFrame(reset);
+    setTimeout(reset, 80);
+    setTimeout(reset, 260);
+  }
+
   function buildBasicApp() {
     var app = el('div', 'hxb-migrated-shell', ''); app.id = 'hxb-app';
     var frame = document.createElement('iframe');
@@ -510,6 +529,7 @@
     frame.title = '基础服务';
     frame.src = migratedBasicTarget || '/basic-service/basic-service-home.html';
     frame.addEventListener('load', function () {
+      resetMigratedBasicScroll(frame);
       try {
         var doc = frame.contentDocument;
         var style = doc.createElement('style');
@@ -733,6 +753,7 @@
     var main = document.querySelector('main');
     if (!shell || !main) return;
     shell.setAttribute('data-view', 'basic');
+    resetMigratedBasicScroll();
     var app = document.getElementById('hxb-app');
     if (!app) {
       main.appendChild(buildBasicApp());
@@ -740,6 +761,7 @@
     }
     var frame = app && app.querySelector('iframe');
     if (frame && frame.getAttribute('src') !== target) frame.src = target;
+    resetMigratedBasicScroll(frame);
   });
   function goBasic(section, tab) {
     var target = '/basic-service/basic-service-home.html';

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>基础服务｜产业服务平台</title>
-  <link rel="stylesheet" href="content-service-templates.css?v=20260821-15" />
+  <link rel="stylesheet" href="content-service-templates.css?v=20260824-4" />
   <style>
     :root{--blue:#075fe6;--navy:#102e57;--ink:#17263a;--muted:#6b7b90;--line:#dfe8f3;--page:#f3f7fb;--white:#fff;--teal:#12a39f;--shadow:0 10px 28px rgba(35,69,112,.08)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--page);color:var(--ink);font:14px/1.6 "Microsoft YaHei","PingFang SC",Arial,sans-serif}button{font:inherit}.utility{height:34px;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;background:#f9fbfd;border-bottom:1px solid #edf1f6;color:#738196;font-size:12px}.utility span+span{margin-left:24px}.header{height:66px;padding:0 5vw;background:#fff;border-bottom:1px solid #e6edf5;display:flex;align-items:center;position:sticky;top:0;z-index:10}.logo{display:flex;align-items:center;gap:10px;margin-right:38px}.mark{width:34px;height:34px;border-radius:7px;background:linear-gradient(145deg,#0875ef,#1749c8);display:grid;place-items:center;color:#fff;font-weight:700}.logo b{font-size:18px}.logo em{font-style:normal;color:var(--blue);background:#eaf2ff;padding:2px 7px;border-radius:4px;font-size:11px}nav{display:flex;gap:26px;height:100%;align-items:center}nav a{color:#36445a;text-decoration:none;position:relative}nav a.active{color:var(--blue);font-weight:700}nav a.active:after{content:"";position:absolute;left:0;right:0;bottom:-23px;height:3px;background:var(--blue)}.workspace{margin-left:auto;border:0;background:var(--blue);color:#fff;padding:10px 18px;border-radius:5px;cursor:pointer}
@@ -210,7 +210,7 @@
 #training .service:nth-child(2):before{background:linear-gradient(135deg,#155a87,#087fb6 67%,#32a2cd)}#training .service:nth-child(3):before{background:linear-gradient(135deg,#263f81,#315fb6 65%,#5287de)}
 #training .service h3{position:absolute;left:18px;right:18px;top:67px;color:#fff;font-size:18px;z-index:1}#training .service p{min-height:48px}#training .service-foot{display:flex}#training .service-status{display:inline-block;margin-bottom:0}#training .service button{display:inline-block;width:auto;padding:3px 0;background:transparent;color:#4e78ab;font-size:12px;font-weight:400}#training .service button:hover{color:var(--brand);text-decoration:underline}
 @media(max-width:900px){#training-list .directory-table tbody{grid-template-columns:1fr!important}}
-</style></head>
+</style><link rel="stylesheet" href="platform-foundation.css?v=20260824-3"></head>
 <body>
   <div class="utility"><div><span>国泰君安期货</span><span>市场洞察</span><span>业务办理</span><span>活动中心</span><span>API 服务</span></div><div>服务热线 400-800-2026　　帮助中心</div></div>
   <header class="header"><div class="logo" data-link="basic-service-home.html"><span class="mark">国泰</span><b>产业服务平台</b><em>产业版</em></div><nav><a href="#" data-notice="平台总首页暂未制作">首页</a><a href="#" data-notice="产业咨询页面暂未制作">产业咨询</a><a class="active" href="#">基础服务</a><a href="#" data-notice="智能交易页面暂未制作">智能交易</a><a href="#" data-notice="投研支持页面暂未制作">投研支持</a><a href="#" data-notice="风险管理页面暂未制作">风险管理</a><a href="#" data-notice="大宗采销页面暂未制作">大宗采销</a></nav><button class="workspace" data-link="index.html?v=20260821-31#workbench">我的工作台</button></header>
@@ -255,7 +255,7 @@
   </script>
   <script>
     const serviceGroups=[
-      {id:'consulting',name:'咨询服务',items:[['业务开展可行性分析','可申请','index.html'],['内控管理制度建设','内容专题'],['监管政策解读及案例分析','内容']]},
+      {id:'consulting',name:'咨询服务',items:[['业务开展可行性分析','可申请','index.html'],['内控管理制度建设','内容专题','basic-service-home.html?view=internal-control#content/internal-control'],['监管政策解读及案例分析','内容','basic-service-home.html?view=policy-center#content/policy-center']]},
       {id:'training',name:'培训课程',items:[['套保会计实务','课程','training-center.html#course/hedge-accounting'],['风险管理基础知识','课程','course-experience.html#risk'],['衍生品工具应用实例','部分已有','course-experience.html#derivative']]},
       {id:'events',name:'活动与调研',items:[['监管政策解读直播','可预约','service-hubs.html#activity'],['行业调研策划及信息分享','可报名','service-hubs.html#activity'],['行业沙龙与峰会','可报名','service-hubs.html#activity']]},
       {id:'talent',name:'人才服务',items:[['专业人才输送','可申请','service-hubs.html#talent'],['双向人员交流或实习','可申请','service-hubs.html#talent'],['外部专家资源库','可预约','service-hubs.html#talent']]}
@@ -275,7 +275,7 @@
   <script src="talent-home-links.js?v=20260821-1"></script>
   <script src="talent-home-entry.js?v=20260821-1"></script>
   <script src="service-center-nav.js?v=20260821-2"></script>
-  <script src="content-service-templates.js?v=20260821-15"></script>
+  <script src="content-service-templates.js?v=20260824-4"></script>
   <script src="breadcrumb-hierarchy.js?v=20260821-1"></script>
 </body>
 </html>
