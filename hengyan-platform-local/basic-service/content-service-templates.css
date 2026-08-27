@@ -21,3 +21,6 @@ body.content-service-mode>.hero,body.content-service-mode>main{display:none!impo
 @media(max-width:760px){.cs-policy-ai-hero{grid-template-columns:48px minmax(0,1fr)}.cs-policy-ai-hero:before{width:46px;height:46px}.cs-policy-ai-hero em{grid-column:1/-1}}
 .cs-policy-ai-hero{background:linear-gradient(112deg,#f7f5ff 0%,#eef4ff 58%,#eaf8ff 100%);border:1px solid #a8b9e8;border-left:5px solid #6558d8;color:#17345b;box-shadow:0 8px 21px rgba(54,78,137,.13)}.cs-policy-ai-hero:before{background:linear-gradient(145deg,#6558d8,#2879e6);color:#fff}.cs-policy-ai-hero small{color:#6558d8}.cs-policy-ai-hero span{color:#586f8c}.cs-policy-ai-hero em{border-color:#2d70d3;background:#1768dc;color:#fff}.cs-policy-ai-hero:hover{border-color:#7f96d9;border-left-color:#5647cc;box-shadow:0 11px 26px rgba(54,78,137,.19)}
 .cs-crumb-link{border:0;background:none;padding:0;color:var(--cs-blue);cursor:pointer;font:inherit}.cs-crumb-link:hover{text-decoration:underline}
+/* 在正式产业版首页中承接同一内容模板 */
+body.content-service-mode>.site-shell>main,body.content-service-mode>.site-shell>.site-footer{display:none!important}
+body.content-service-mode>.site-shell>.content-service-view{display:block!important}

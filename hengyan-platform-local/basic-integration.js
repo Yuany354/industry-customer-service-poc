@@ -1,5 +1,15 @@
 (function () {
   'use strict';
+  var primaryNavStyle = document.createElement('style');
+  primaryNavStyle.textContent = '.main-header nav>button:nth-child(2){display:none!important}.tool-page.smart-page>.wrap>.tool-title,.tool-page.research-page>.wrap>.tool-title{display:none!important}.data-disclaimer,.prototype-notice{display:none!important}';
+  document.head.appendChild(primaryNavStyle);
+  // 金融服务案例复用基础服务内容服务页模板。
+  (function loadFinancialCaseTemplate() {
+    var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/basic-service/content-service-templates.css?v=20260821-15'; document.head.appendChild(css);
+    var template = document.createElement('script'); template.src = '/basic-service/content-service-templates.js?v=20260821-15';
+    template.onload = function () { var cases = document.createElement('script'); cases.src = '/financial-case-content.js?v=2'; document.body.appendChild(cases); };
+    document.head.appendChild(template);
+  }());
   function mount() {
     var shell = document.querySelector('.site-shell');
     var main = document.querySelector('main');
@@ -84,6 +94,44 @@
     }
     document.dispatchEvent(new CustomEvent('open-migrated-basic', { detail: { path: path } }));
   }
+  function cleanDemoLabels(doc) {
+    if (!doc || !doc.body) return;
+    doc.querySelectorAll('.data-disclaimer,.prototype-notice').forEach(function (node) { node.remove(); });
+    var walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+    var node;
+    while ((node = walker.nextNode())) {
+      var text = node.nodeValue;
+      if (!text || !/(模拟|原型|示例|不提供真实下单|未连接真实AI|仅供参考)/.test(text)) continue;
+      text = text
+        .replace(/·\s*延时行情\s*·\s*模拟环境/g, '')
+        .replace(/延时行情\s*·\s*模拟演示数据，?不提供真实下单/g, '行情数据')
+        .replace(/模拟环境/g, '交易环境')
+        .replace(/模拟演示数据/g, '业务数据')
+        .replace(/原型模拟数据/g, '业务数据')
+        .replace(/原型模拟信息/g, '业务信息')
+        .replace(/原型模拟/g, '业务参考')
+        .replace(/原型演示数据/g, '业务参考数据')
+        .replace(/原型演示内容/g, '业务参考内容')
+        .replace(/原型演示正文/g, '业务参考正文')
+        .replace(/原型演示口径/g, '业务口径')
+        .replace(/原型演示/g, '业务参考')
+        .replace(/原型中的/g, '')
+        .replace(/未连接真实AI/g, 'AI 辅助分析')
+        .replace(/不提供真实下单/g, '请按正式权限办理')
+        .replace(/示例资料/g, '参考资料')
+        .replace(/示例模板/g, '参考模板')
+        .replace(/示例课程/g, '课程')
+        .replace(/示例文件/g, '参考文件')
+        .replace(/原型说明/g, '业务说明');
+      node.nodeValue = text;
+    }
+  }
+  function cleanAllDemoLabels() {
+    cleanDemoLabels(document);
+    document.querySelectorAll('iframe').forEach(function (frame) {
+      try { cleanDemoLabels(frame.contentDocument); } catch (e) {}
+    });
+  }
   function mountMenu() {
     if (document.getElementById('formal-basic-mega')) return;
     var header = document.querySelector('.main-header');
@@ -102,7 +150,35 @@
   setInterval(mount, 500);
   setInterval(mountNativeWorkspace, 500);
   setInterval(mountMenu, 700);
+  setInterval(cleanAllDemoLabels, 500);
   document.addEventListener('click', function (event) {
+    var clicked = event.target && event.target.closest ? event.target : null;
+    if (clicked) {
+      var analystButton = clicked.closest('.analyst-grid article footer button');
+      if (analystButton && analystButton.textContent.trim() === '研究员主页') {
+        var analystCard = analystButton.closest('article');
+        var analystName = analystCard && analystCard.querySelector('h3') ? analystCard.querySelector('h3').textContent.trim() : '';
+        var analystIds = { '周正': 'zz', '林洲': 'lz', '韩熙': 'lt' };
+        if (analystIds[analystName]) {
+          event.preventDefault();
+          event.stopPropagation();
+          document.dispatchEvent(new CustomEvent('open-research-analyst', { detail: { id: analystIds[analystName] } }));
+          return;
+        }
+      }
+      var terminalSide = clicked.closest('.access-layout aside button');
+      var terminalCard = clicked.closest('.access-rows article');
+      var terminalAction = clicked.closest('.access-layout button, .access-layout a');
+      var terminalText = [terminalSide, terminalCard, terminalAction].filter(Boolean).map(function (node) {
+        return (node.textContent || '').replace(/\s+/g, '');
+      }).join(' ');
+      if (/终端下载|交易终端下载|选择终端/.test(terminalText)) {
+        event.preventDefault();
+        event.stopPropagation();
+        location.href = '/terminal-download.html';
+        return;
+      }
+    }
     var target = event.target && event.target.closest ? event.target.closest('.workspace-nav button:not([data-basic-workspace-nav])') : null;
     var custom = document.querySelector('.native-basic-workspace');
     if (!target || !custom) return;
@@ -112,7 +188,5 @@
     var basic = document.querySelector('[data-basic-workspace-nav]');
     if (basic) basic.classList.remove('active');
   }, true);
-  document.addEventListener('DOMContentLoaded', function () { mount(); mountMenu(); });
+  document.addEventListener('DOMContentLoaded', function () { mount(); mountMenu(); cleanAllDemoLabels(); });
 })();
-
-
